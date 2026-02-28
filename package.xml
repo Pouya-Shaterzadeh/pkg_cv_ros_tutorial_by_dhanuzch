@@ -1,27 +1,21 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>pkg_cv_ros_tutorial_by_dhanuzch</name>
   <version>0.0.0</version>
-  <description>The pkg_cv_ros_tutorial_by_dhanuzch package</description>
+  <description>The pkg_cv_ros_tutorial_by_dhanuzch package migrated to ROS 2</description>
 
   <maintainer email="mr.dhanush29@gmail.com">dhanuzch</maintainer>
-
   <license>BSD</license>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-
-
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
 
   <export>
-
-
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
