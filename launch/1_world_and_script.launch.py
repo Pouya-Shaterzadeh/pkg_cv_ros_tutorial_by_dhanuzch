@@ -8,27 +8,41 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_name = 'pkg_cv_ros_tutorial_by_dhanuzch'
     pkg_share = get_package_share_directory(pkg_name)
-    gazebo_ros_share = get_package_share_directory('gazebo_ros')
+    ros_gz_sim_share = get_package_share_directory('ros_gz_sim')
 
-    # Models path
-    models_path = os.path.join(pkg_share, 'models')
+    px4_models_path = os.path.expanduser('~/PX4-Autopilot/Tools/simulation/gz/models')
+    models_path = os.path.join(pkg_share, 'models') + ':' + px4_models_path
+    
     set_gazebo_model_path_cmd = SetEnvironmentVariable(
-        name='GAZEBO_MODEL_PATH',
+        name='GZ_SIM_RESOURCE_PATH',
         value=models_path
     )
 
     # World file
     world_file = os.path.join(pkg_share, 'worlds', '1_world.world')
 
-    # Include gazebo_ros empty_world launch file
+    # Include ros_gz_sim launch file
     gazebo_launch_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(gazebo_ros_share, 'launch', 'gazebo.launch.py')
+            os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'world': world_file}.items()
+        launch_arguments={'gz_args': f"-r {world_file}"}.items()
     )
 
-    # Node for camera_read
+    # Bridge: Gazebo topic /camera -> ROS 2 topic /camera/image_raw
+    bridge_node = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/camera@sensor_msgs/msg/Image[gz.msgs.Image'
+        ],
+        remappings=[
+            ('/camera', '/camera/image_raw')
+        ],
+        output='screen'
+    )
+
+    # Node for camera_read (subscribes to /camera/image_raw)
     camera_read_node = Node(
         package=pkg_name,
         executable='camera_read.py',
@@ -39,5 +53,6 @@ def generate_launch_description():
     return LaunchDescription([
         set_gazebo_model_path_cmd,
         gazebo_launch_cmd,
+        bridge_node,
         camera_read_node
     ])

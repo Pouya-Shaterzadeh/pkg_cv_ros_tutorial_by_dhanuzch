@@ -21,9 +21,9 @@ install(PROGRAMS
 
 # Install specific directories to the package's share directory
 install(DIRECTORY
-  launch/
-  models/
-  worlds/
+  launch
+  models
+  worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

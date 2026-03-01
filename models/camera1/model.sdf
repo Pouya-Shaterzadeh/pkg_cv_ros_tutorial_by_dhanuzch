@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>/camera
 <sdf version="1.6">
   <model name="camera_1">
-    <plugin name="ros_camera_1" filename="libROSLogicalCameraPlugin.so">
-    </plugin>
+    
 
     <link name="camera_1_link">
       <gravity>false</gravity>
@@ -67,12 +66,8 @@
         <always_on>true</always_on>
         <update_rate>10</update_rate>
         <visualize>false</visualize>
-        <plugin name='camera_controller' filename='libgazebo_ros_camera.so'>
-            <cameraName>camera_1</cameraName>
-            <eventThreshold>10</eventThreshold>
-            <cameraInfoTopicName>camera_1</cameraInfoTopicName>
-            <!-- <eventsTopicName>events</eventsTopicName> -->
-        </plugin>
+        <topic>camera/image_raw</topic>
+        
       </sensor>
     
     </link>

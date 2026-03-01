@@ -24,7 +24,7 @@
     </scene>
     <gui fullscreen="0">
       <camera name="user_camera">
-        <pose frame="">1.36951 7.95508 3.16091 0 0.433999 -1.62601</pose>
+        <pose frame="">3.39871 5.18843 3.06319 0 0.325999 -2.242</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -74,18 +74,18 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <light type="directional" name="sun">
-      <cast_shadows>true</cast_shadows>
-      <pose>0 0 10 0 0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
+    <light name="Warehouse_CeilingLight_003" type="point">
+      <pose frame="">0 0 9 0 -0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
       <attenuation>
-        <range>1000</range>
-        <constant>0.9</constant>
+        <range>80</range>
+        <constant>0.3</constant>
         <linear>0.01</linear>
         <quadratic>0.001</quadratic>
       </attenuation>
-      <direction>-0.5 0.1 -0.9</direction>
+      <cast_shadows>1</cast_shadows>
+      <direction>0.1 0.1 -1</direction>
     </light>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type="adiabatic" />
@@ -100,18 +100,5 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <include>
-      <uri>model://x500_mono_cam</uri>
-      <name>drone</name>
-      <pose>0 0 0.5 0 0 0</pose>
-    </include>
-
-    <!-- QR Code wall in front of the drone -->
-    <include>
-      <uri>model://qr_wall</uri>
-      <name>qr_wall</name>
-      <pose>2 0 0.5 0 0 0</pose>
-    </include>
-
-  </world>
+    <include><uri>model://camera1</uri><name>camera_1</name><pose>0.07 2.8 0.55 0 0 -1.57</pose></include><include><uri>model://qr_wall</uri><name>qr_wall</name><pose>0.3 -2.2 0 0 0 0</pose></include><include><uri>model://turtlebot</uri><name>turtlebot</name><pose>0.3 1.9 0 0 0 -1.25</pose></include></world>
 </sdf>

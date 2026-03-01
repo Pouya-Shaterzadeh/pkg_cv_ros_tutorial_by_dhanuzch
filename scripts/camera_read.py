@@ -15,7 +15,7 @@ class Camera1(Node):
     self.bridge = CvBridge()
     self.image_sub = self.create_subscription(
         Image,
-        '/camera_1/image_raw',
+        '/camera/image_raw',
         self.callback,
         10
     )
