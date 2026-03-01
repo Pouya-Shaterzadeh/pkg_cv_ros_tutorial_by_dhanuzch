@@ -1,24 +1,31 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import cv2
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from pyzbar.pyzbar import decode
 
-class camera_1:
+class Camera1(Node):
 
   def __init__(self):
-    self.image_sub = rospy.Subscriber("/camera_1/image_raw", Image, self.callback)
+    super().__init__('decode_qr')
+    self.bridge = CvBridge()
+    self.image_sub = self.create_subscription(
+        Image,
+        '/camera_1/image_raw',
+        self.callback,
+        10
+    )
 
-  def callback(self,data):
-    bridge = CvBridge()
-
+  def callback(self, data):
     try:
-      cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
+      cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as e:
-      rospy.logerr(e)
+      self.get_logger().error(str(e))
+      return
 
     (rows,cols,channels) = cv_image.shape
     
@@ -35,31 +42,38 @@ class camera_1:
 
     qr_result = decode(img_bw)
 
-    #print (qr_result)
-    
-    qr_data = qr_result[0].data
-    print qr_data
+    if qr_result:
+        qr_data = qr_result[0].data
+        print(qr_data)
 
-    (x, y, w, h) = qr_result[0].rect
+        (x, y, w, h) = qr_result[0].rect
 
-    cv2.rectangle(resized_image, (x, y), (x + w, y + h), (0, 0, 255), 4)
+        cv2.rectangle(resized_image, (x, y), (x + w, y + h), (0, 0, 255), 4)
 
-    text = "{}".format(qr_data)
-    cv2.putText(resized_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # Assuming qr_data is bytes in Python 3 from pyzbar, so decode. If it's str, this will throw, but usually it's bytes.
+        try:
+          text = "{}".format(qr_data.decode('utf-8'))
+        except AttributeError:
+          text = "{}".format(qr_data)
+          
+        cv2.putText(resized_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
     cv2.imshow("Camera output", resized_image)
 
     cv2.waitKey(5)
 
-def main():
-	camera_1()
-	
-	try:
-		rospy.spin()
-	except KeyboardInterrupt:
-		rospy.loginfo("Shutting down")
-	
-	cv2.destroyAllWindows()
+def main(args=None):
+    rclpy.init(args=args)
+    camera_node = Camera1()
+    
+    try:
+        rclpy.spin(camera_node)
+    except KeyboardInterrupt:
+        camera_node.get_logger().info("Shutting down")
+    finally:
+        camera_node.destroy_node()
+        rclpy.shutdown()
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    rospy.init_node('camera_read', anonymous=False)
     main()
