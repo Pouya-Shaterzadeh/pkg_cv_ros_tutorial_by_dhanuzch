@@ -42,11 +42,11 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Node for decode_qr (subscribes to /camera/image_raw)
-    decode_qr_node = Node(
+    # Node for camera_read (subscribes to /camera/image_raw)
+    camera_read_node = Node(
         package=pkg_name,
         executable='decode_qr.py',
-        name='decode_qr',
+        name='camera_read',
         output='screen'
     )
 
@@ -54,5 +54,5 @@ def generate_launch_description():
         set_gazebo_model_path_cmd,
         gazebo_launch_cmd,
         bridge_node,
-        decode_qr_node
+        camera_read_node
     ])

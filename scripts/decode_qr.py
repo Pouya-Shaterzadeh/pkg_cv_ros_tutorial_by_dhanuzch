@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 import cv2
+import numpy as np
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -27,39 +28,45 @@ class Camera1(Node):
       self.get_logger().error(str(e))
       return
 
-    (rows,cols,channels) = cv_image.shape
-    
+    # Keep original image size instead of squishing it (avoids distortion)
     image = cv_image
+    
+    # Pre-process image to optimize for pyzbar (grayscale + threshold)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 45, 255, cv2.THRESH_BINARY)
+    
+    # Run pyzbar decode on the thresholded image
+    decoded_objects = decode(thresh)
 
-    resized_image = cv2.resize(image, (360, 640)) 
+    for obj in decoded_objects:
+        # Get polygon points
+        points = obj.polygon
+        # Note: If the polygon has more than 4 points, we can compute the convex hull
+        if len(points) > 4:
+            hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
+            points = hull.reshape(-1, 2)
+        
+        # Draw the bounding polygon (green color like in sky_warriors_ws)
+        for j in range(len(points)):
+            cv2.line(image, tuple(points[j]), tuple(points[(j+1) % len(points)]), (0, 255, 0), 3)
 
-    gray = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-    thresh = 40
-    img_bw = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)[1]
-
-    #cv2.imshow("B&W Image", gray)
-    #cv2.imshow("B&W Image /w threshold", img_bw)
-
-    qr_result = decode(img_bw)
-
-    if qr_result:
-        qr_data = qr_result[0].data
-        print(qr_data)
-
-        (x, y, w, h) = qr_result[0].rect
-
-        cv2.rectangle(resized_image, (x, y), (x + w, y + h), (0, 0, 255), 4)
-
-        # Assuming qr_data is bytes in Python 3 from pyzbar, so decode. If it's str, this will throw, but usually it's bytes.
+        # Draw the text at the top-left corner
+        x = obj.rect.left
+        y = obj.rect.top
+        
+        # Format the barcode text
         try:
-          text = "{}".format(qr_data.decode('utf-8'))
+          qr_data = obj.data.decode('utf-8')
         except AttributeError:
-          text = "{}".format(qr_data)
-          
-        cv2.putText(resized_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+          qr_data = str(obj.data)
 
-    cv2.imshow("Camera output", resized_image)
+        # Print to terminal
+        print(qr_data)
+        
+        # Render the text above the bounding box
+        cv2.putText(image, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
+    cv2.imshow("Camera output", image)
     cv2.waitKey(5)
 
 def main(args=None):

@@ -108,9 +108,9 @@
 
     <!-- QR Code wall in front of the drone -->
     <include>
-      <uri>model://qr_wall</uri>
+      <uri>model://qr_competition</uri>
       <name>qr_wall</name>
-      <pose>2 0 0.5 0 0 0</pose>
+      <pose>1.0 0 0.5 0 1.5708 0</pose>
     </include>
 
   </world>
